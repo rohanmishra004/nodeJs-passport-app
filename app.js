@@ -1,16 +1,54 @@
 const express = require('express');
 const expressLayouts = require('express-ejs-layouts');
+const mongoose = require('mongoose');
+const session = require('express-session');
+const flash = require('connect-flash')
 
 
 const app = express();
 
-//middleware
+//DB config
+const db = require('./config/keys').MongoURI;
+
+//connect to Mongo
+mongoose.set('strictQuery', false);
+mongoose.connect(db)
+    .then(() => console.log('MongoDB Connected...'))
+    .catch(err => console.log(err));
+
+
+//EJS
 app.use(expressLayouts);
 app.set('view engine', 'ejs'); //here we are setting the type of view engine
 
+
+//Express-session
+app.use(session({
+    secret: 'secret',
+    resave: true,
+    saveUninitialized:true
+}))
+
+//Connect Flash
+app.use(flash());
+
+
+//Global Variables
+app.use((req, res, next) => { 
+    res.locals.success_msg = req.flash('success_msg');
+    res.locals.error_msg = req.flash('error_msg');
+    next()
+})
+
+//BodyParser
+app.use(express.urlencoded({ extended: false }));
+
+
+
+
 //Routes
 app.use('/',require('./routes/index'))
-app.use('/',require('./routes/users'))
+app.use('/users',require('./routes/users'))
 
 
 
