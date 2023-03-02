@@ -1,10 +1,17 @@
+
+
 const express = require('express');
-
 const router = express.Router();
+const { ensureAuthenticated, forwardAuthenticated } = require('../config/auth');
 
-router.get('/', (req, res) => {
-    res.render('welcome') //this will render the view in welcome.ejs inside views folder
-})
+// Welcome Page
+router.get('/', forwardAuthenticated, (req, res) => res.render('welcome'));
 
+// Dashboard
+router.get('/dashboard', ensureAuthenticated, (req, res) =>
+  res.render('dashboard', {
+    user: req.user
+  })
+);
 
-module.exports = router
+module.exports = router;

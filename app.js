@@ -2,10 +2,16 @@ const express = require('express');
 const expressLayouts = require('express-ejs-layouts');
 const mongoose = require('mongoose');
 const session = require('express-session');
-const flash = require('connect-flash')
+const flash = require('connect-flash');
+const passport = require('passport');
 
 
 const app = express();
+
+
+//passport config
+require('./config/passport')(passport)
+
 
 //DB config
 const db = require('./config/keys').MongoURI;
@@ -26,9 +32,12 @@ app.set('view engine', 'ejs'); //here we are setting the type of view engine
 app.use(session({
     secret: 'secret',
     resave: true,
-    saveUninitialized:true
-}))
+    saveUninitialized: true
+}));
 
+//passport local middleware
+app.use(passport.initialize());
+app.use(passport.session());
 //Connect Flash
 app.use(flash());
 
@@ -37,6 +46,7 @@ app.use(flash());
 app.use((req, res, next) => { 
     res.locals.success_msg = req.flash('success_msg');
     res.locals.error_msg = req.flash('error_msg');
+    res.locals.error = req.flash('error')
     next()
 })
 
